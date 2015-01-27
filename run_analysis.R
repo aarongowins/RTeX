@@ -65,7 +65,7 @@ n<-as.character(activity$V2)
 colnames(all_means_by_activity)<-n
 ## Concatenate the subject means and activity means
 all_means<-cbind(all_means_by_activity,all_means_by_subject)
-head(all_means)
+t(all_means)
 ## 5. From the data set in step 4, creates a second, 
 ## independent tidy data set with the average of each variable for each activity and each subject.:
 write.table(all_means,file="Coursera.txt",row.name=TRUE)
