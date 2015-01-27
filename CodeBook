@@ -3,21 +3,6 @@ This document describes the code inside run_analysis.R.
 
 The code is splitted (by comments) in some sections:
 
-Helper functions
-Constants
-Downloading and loading data
-Manipulating data
-Writing final data to CSV
-Helper functions
-
-Some functions to avoid code repetition and make the rest of code more clean.
-
-fileJoin
-
-Used to build file paths, it concatenates strings using a slash as separator.
-
-downloadToDataDir
-
 Downloads the given url to the given destiny file. It also creates data dir if it doesn't exist.
 
 extractUciHarFile
