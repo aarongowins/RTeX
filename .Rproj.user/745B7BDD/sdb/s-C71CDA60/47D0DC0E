@@ -1,0 +1,16 @@
+{
+    "contents" : "fileURL<-\"https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip \"\nif(!file.exists(\"data\"))\n{dir.create(\"data\")}\ndownload.file(fileURL,destfile=\"HW.zip\",method=\"curl\")\nunzip(\"HW.zip\",exdir=\"./data/HW\")\n#list.files()\ntest_data<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/test/X_test.txt\")\ntrain_data<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/train/X_train.txt\")\nmerged_data<-rbind(test_data,train_data)\n#dim(merged_data)\nfeat<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/features.txt\")\nmean_rows<-grep(c(\"mean()\"),feat$V2,fixed=TRUE)\nstd_rows<-grep(c(\"std()\"),feat$V2,fixed=TRUE)\nmean_var_names<-feat[mean_rows,2]\nstd_var_names<-feat[std_rows,2]\n#mean_var_names[1]\n#std_var_names[1]\nmean_cols<-merged_data[,mean_rows]\nstd_cols<-merged_data[,std_rows]\nm<-as.character(mean_var_names)\n\ns<-as.character(std_var_names)\nnames(std_cols)<-s\nnames(mean_cols)<-m\n\nactivity<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/activity_labels.txt\")\ny_train<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/train/y_train.txt\")\ny_test<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/test/y_test.txt\")\nmerge_y<-rbind(y_test,y_train)\nactivities<-activity$V2[match(merge_y$V1,activity$V1)]\n##std_cols$activity<-activities\n##mean_cols$activity<-activities\nsubject_train<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/train/subject_train.txt\")\nsubject_test<-read.table(\"/Users/aarongowins/data/HW/UCI HAR Dataset/test/subject_test.txt\")\nmerge_subject<-rbind(subject_test,subject_train)\n#std_cols$whose<-merge_subject\n#mean_cols$whose<-merge_subjects\nall_data<-cbind(mean_cols,std_cols)\nf<-factor(merge_subject[[1]])\nall_means_by_subject<-sapply(split(all_data,f),colMeans)\nff<-factor(merge_y[[1]])\nall_means_by_activity<-sapply(split(all_data,ff),colMeans)\nn<-as.character(activity$V2)\ncolnames(all_means_by_activity)<-n\nall_means<-cbind(all_means_by_activity,all_means_by_subject)\nt(all_means)\nhead(all_means)\nwrite.table(all_means,file=\"Coursera.txt\",row.name=TRUE)\n",
+    "created" : 1422406044366.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1728397985",
+    "id" : "47D0DC0E",
+    "lastKnownWriteTime" : 1422406281,
+    "path" : "~/Users/aarongowins/data/Coursera/run_analysis.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
