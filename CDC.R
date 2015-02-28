@@ -18,7 +18,7 @@ URL3<-"http://wwwn.cdc.gov/nchs/nhanes/2003-2004/BMX_C.XPT"
 download.file(URL3,destfile="CDC3",method="curl")
 mydata3 <- sasxport.get("CDC3")
 heights<-mydata3[,c(1,15)] #<-- choose the subject id and height
-ages<-mydata2[,c(1,4,5,6)] #<-- choose the subject id, age in months, age in years, and gender
+ages<-mydata2[,c(1,8,5,6)] #<-- choose the subject id, age in months, age in years, and gender
 masses<-means[,c(1,105,104,102)] #<-- choose the subject id, bodyweight, fat mass, and lean mass
 all_data<-merge(masses,ages,by="seqn") #<-- Merge the set by subject id
 all_data<-merge(all_data,heights,by="seqn")
