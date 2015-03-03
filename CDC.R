@@ -30,4 +30,4 @@ male_data<-all_data[which(all_data$riagendr==1),] #<-- choose males
 female_data<-all_data[which(all_data$riagendr==2),] #<-- choose females
 library(xlsx)
 write.xlsx(male_data,file="./maleCDCdataMo.xlsx") #<-- where do you want the file?
-write.xlsx(female_data,file="./femaleCDCdataMo.xlsx") 
+write.xlsx(female_data,file="./femaleCDCdataMo.xlsx") #<-- please specify a directory
