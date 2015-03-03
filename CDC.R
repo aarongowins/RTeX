@@ -28,6 +28,7 @@ all_data$dxdtoli<-all_data$dxdtoli/1000
 all_data$dxdtofat<-all_data$dxdtofat/1000
 male_data<-all_data[which(all_data$riagendr==1),] #<-- choose males
 female_data<-all_data[which(all_data$riagendr==2),] #<-- choose females
+#install.packages('xlsx') #<-- uncomment if this has never been done before
 library(xlsx)
 write.xlsx(male_data,file="./maleCDCdataMo.xlsx") #<-- where do you want the file?
 write.xlsx(female_data,file="./femaleCDCdataMo.xlsx") #<-- please specify a directory
