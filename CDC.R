@@ -23,6 +23,9 @@ masses<-means[,c(1,105,104,102)] #<-- choose the subject id, bodyweight, fat mas
 all_data<-merge(masses,ages,by="seqn") #<-- Merge the set by subject id
 all_data<-merge(all_data,heights,by="seqn")
 all_data<-all_data[which(all_data$ridageyr<19),] #<-- choose children
+all_data$dxdtotot<-all_data$dxdtotot/1000
+all_data$dxdtoli<-all_data$dxdtoli/1000
+all_data$dxdtofat<-all_data$dxdtofat/1000
 male_data<-all_data[which(all_data$riagendr==1),] #<-- choose males
 female_data<-all_data[which(all_data$riagendr==2),] #<-- choose females
 library(xlsx)
