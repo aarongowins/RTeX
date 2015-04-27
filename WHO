@@ -1,0 +1,7 @@
+URL<-"http://www.who.int/childgrowth/standards/wfa_girls_0_5_zscores.txt"
+download.file(URL,destfile="WHO",method="curl")
+#install.packages(xlsx)
+library(xlsx)
+who2<-read.table("WHO",header=TRUE,sep="")
+weight<-who[c(1,6)]
+write.xlsx(weight,file="/Users/gowinsja/Desktop/WHO2.xlsx")
