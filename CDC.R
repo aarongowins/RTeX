@@ -2,6 +2,7 @@
 # and right click on the link to the data you want, copy and paste the URL here:
 URL<-"ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/nhanes/dxx/dxx_c.xpt"
 download.file(URL,destfile="CDC",method="curl") # <-- On a PC you want to delete "method="curl"
+#install.packages('Hmisc') <- uncomment this if it doesn't look familiar
 library(Hmisc) #<-- need to load package for SAS files .xpt
 mydata <- sasxport.get("CDC")
 #head(mydata) #<-- Uncomment this to see the first six lines of your file
