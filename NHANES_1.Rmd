@@ -1,0 +1,125 @@
+---
+title: "NHANES_1"
+author: "aaron gowins"
+date: "May 22, 2015"
+output: 
+html_document:
+keep_md: true
+---
+
+## Goal
+We have two models of childhood growth that predict body composition, along with the required energy intake to reach that body composition based on thermodynamics. We have WHO data that includes weight for each age, and intake for each age. The data is divided by standard deviations from the mean. Can we cause the models to follow the 0SD (mean) weight trajectory, and compare the model outputs for energy intake to see which model is closest to the mean intake trajectory to see which works best? (The answer is maybe, we will determine a way to find out for sure.)
+
+We can't find reliable data for both body composition and energy intake that is subject specific, and has the power we will need. What we can do, though, is develop some understanding of the underpinnings behind this relationship. Let's find out if the 50th percentile for weight can be used to predict the lean body mass of an individual. The reason this might be helpful is because energy expenditure is governed primarily by body composition, since lean mass requires more energy to maintain than fat mass. If we wish to make a prediction of energy expenditure based on weight, then we must be able to predict lean mass, or equvalently, body composition, based on weight.
+
+We will load some data from the CDC. We will choose 8 year olds to control for age because that's the lowest age we have subject-specific data for. We will ignore the gender to improve our power, and we will demonstrate later that it doesn't matter.
+
+```{r, cache=TRUE, warning=FALSE, message=FALSE, echo=FALSE}
+# Visit the NHANES website: http://wwwn.cdc.gov/nchs/nhanes/search/nhanes_continuous.aspx
+# and right click on the link to the data you want, copy and paste the URL here:
+URL<-"ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/nhanes/dxx/dxx_c.xpt"
+download.file(URL,destfile="CDC",method="curl") # <-- On a PC you want to delete "method="curl"
+#install.packages('Hmisc') <- uncomment this if it doesn't look familiar
+library(Hmisc) #<-- need to load package for SAS files .xpt
+mydata <- sasxport.get("CDC")
+#head(mydata) #<-- Uncomment this to see the first six lines of your file
+#str(mydata) #<-- Uncomment this to see the structre of your file
+#summary(mydata) #<-- Uncomment this to see a summary of your file
+# Descriptions of the variables are at (example): http://www.cdc.gov/nchs/data/nhanes/dxa/dxx_c.pdf
+means<-aggregate(.~seqn,FUN=mean,data=mydata) #<-- Each subject had five measurements, find the means
+# Load the demographic data for variables like age, etc., matched by "seqn":
+URL2<-"http://wwwn.cdc.gov/nchs/nhanes/2003-2004/DEMO_C.XPT" 
+download.file(URL2,destfile="CDC2",method="curl") #<-- No curl for PC
+mydata2 <- sasxport.get("CDC2")
+# Descriptions of the variables are at (ex): http://wwwn.cdc.gov/nchs/nhanes/search/nhanes03_04.aspx
+URL3<-"http://wwwn.cdc.gov/nchs/nhanes/2003-2004/BMX_C.XPT"
+download.file(URL3,destfile="CDC3",method="curl")
+mydata3 <- sasxport.get("CDC3")
+library(plyr)
+library(gdata)
+library(e1071)
+heights<-mydata3[,c(1,15)] #<-- choose the subject id and height
+ages<-mydata2[,c(1,8,5,6)] #<-- choose the subject id, age in months, age in years, and gender
+masses<-means[,c(1,105,104,102)] #<-- choose the subject id, bodyweight, fat mass, and lean mass
+all_data<-merge(masses,ages,by="seqn") #<-- Merge the set by subject id
+all_data<-merge(all_data,heights,by="seqn")
+all_data$dxdtotot<-all_data$dxdtotot/1000 #<-- change from grams to kilograms
+all_data$dxdtoli<-all_data$dxdtoli/1000
+all_data$dxdtofat<-all_data$dxdtofat/1000
+dims<-dim(all_data)
+head(all_data)
+male_data<-all_data[which(all_data$riagendr==1),] #<-- choose males
+female_data<-all_data[which(all_data$riagendr==2),] #<-- choose females
+#install.packages('xlsx') #<-- uncomment if this has never been done before
+#library(xlsx) #<-- Open if you want to write files
+#write.xlsx(male_data,file="./maleCDCdataMo.xlsx") #<-- where do you want the file?
+#write.xlsx(female_data,file="./femaleCDCdataMo.xlsx") #<-- please specify a directory
+```
+```{r}
+all_data8<-all_data[which(all_data$ridageyr<9),] #<-- choose 8 year olds
+num<-nrow(all_data8)
+
+```
+Now we have a subset of data with `r num` eight year old subjects. We would like to know if there is a correlation between weight and lean mass in order to determine if weight is a good predictor.
+
+```{r,warning=FALSE,message=FALSE}
+library(plyr)
+library(gdata)
+library(e1071)
+all_data_cors<-as.matrix(all_data8)
+cor(all_data_cors)
+```
+
+There appears to be an extremely high correlation between weight and lean mass. Therefore, we can predict lean mass by knowing weight with a great degree of certainty. Therefore, we can predict with some certainty energy intake given a value for weight. The crucial question, however, is; can we conclude that a subject with average bodyweight will have average lean mass? That's the question for which the answer is maybe.
+
+We will calculate the means for each measurement, and then see if the subjects are the same. Let's first sort the dataset by weight so we know we are looking for around the 80th subject.
+
+```{r}
+weight <- all_data8[order(all_data8$dxdtotot),]
+meanweight<-mean(weight$dxdtotot)
+meanlean<-mean(weight$dxdtoli)
+which(abs(all_data8$dxdtoli-meanlean)==min(abs(all_data8$dxdtoli-meanlean)))
+which(abs(all_data8$dxdtotot-meanweight)==min(abs(all_data8$dxdtotot-meanweight)))
+```
+
+We seem to be off by thirteen subjects. It's fairly apparent why the weight subject is close to the 80th, and also why he is not the actual 80th, but since this is going to be important for understanding our question, let's first feel certain that we're doing this right. We can somewhat loosely call the 0SD the 50th percentile, although 50th percentile doesn't describe a mean, it describes a median. Since the WHO data are arranged by SD instead of quantiles, we might assume that the 0SD describes the mean, but what if we were wrong, and the WHO 0SD is the 50th percentile. 
+
+The median will have to be the 80th subject, right? Let's also see if by chance our medians are lining up, since we might wonder if the WHO data is (incorrectly) centered around the median value.
+
+```{r}
+#lean <- all_data[order(all_data$dxdtotot),] 
+which(weight$dxdtoli==median(weight$dxdtoli))
+which(weight$dxdtotot==median(weight$dxdtotot))
+```
+
+Unfortunately, not only is the median weight the 80th subject, but the median lean mass is nowhere near the center. Let's take a look at the distributions.
+
+```{r}
+hist(all_data8$dxdtotot, breaks=30, main=("Histogram of weights"))
+hist(all_data8$dxdtoli, breaks=30, main=("Histogram of lean masses"))
+```
+
+We can see that the distributions are not normal, we could have expected them to be skewed. What we need to relize is that they are not $\textit{similarly skewed}$. We can measure the degree to which a distribution is skewed in R.
+
+```{r}
+
+skewness(all_data8$dxdtotot) 
+skewness(all_data8$dxdtoli) 
+
+```
+
+Maybe we got unlucky with the 8 year olds, let's try 9 year olds.
+```{r}
+all_data9<-all_data[which(all_data$ridageyr<10 & all_data$ridageyr>8),]
+hist(all_data9$dxdtotot, breaks=30, main=("Histogram of weights"))
+hist(all_data9$dxdtoli, breaks=30, main=("Histogram of lean masses"))
+skewness(all_data9$dxdtotot) 
+skewness(all_data9$dxdtoli) 
+sd(all_data9$dxdtotot)
+sd(all_data9$dxdtoli)
+quantile(all_data9$dxdtotot)
+quantile(all_data9$dxdtoli)
+
+```
+
+So, 
