@@ -2,7 +2,9 @@
 title: "Wordclouds"
 author: "aaron gowins"
 date: "June 1, 2015"
-output: html_document
+output: 
+html_document:
+keep_md: true
 ---
 ## Hazir Model
 We will make word clouds and maybe get some other text mining done. We start with a simple example of a text file of the Appendix of Hazhir Rahmandad's paper titled "Human Growth and Body Weight Dynamics: An Integrative Systems Model". This particular appendix is especially large, since this paper presents a mathematical model. 
