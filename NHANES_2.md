@@ -3,7 +3,7 @@ aaron gowins
 May 22, 2015  
 
 
-This project is continually updated at: git@github.com:aarongowins/RTeX.git
+This project is continually updated at: http://rpubs.com/aarongowins/83733
 ## Goal
 
 We have two models of childhood growth. They are trained to predict body composition (fat mass/lean mass distribution), throughout growth. They are also capable of determining the energy intake and expenditure related to a certain gain or loss in fat mass and lean mass. The goal of the models is twofold:
