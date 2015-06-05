@@ -1,6 +1,7 @@
 # Wordclouds
 aaron gowins  
-June 1, 2015  
+June 1, 2015 
+Work done as part of the My-Classes Live Mentoring Program. Check it out at http://live.my-classes.com/
 ## Hazir Model
 We will make word clouds and maybe get some other text mining done. We start with a simple example of a text file of the Appendix of Hazhir Rahmandad's paper titled "Human Growth and Body Weight Dynamics: An Integrative Systems Model". This particular appendix is especially large, since this paper presents a mathematical model. 
 
