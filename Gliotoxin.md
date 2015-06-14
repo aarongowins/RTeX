@@ -54,11 +54,11 @@ findFreqTerms(dtm, lowfreq=5)
 ```
 
 ```r
-findAssocs(dtm, "data", corlimit=0.1)
+findAssocs(dtm, "fat", corlimit=0.1)
 ```
 
 ```
-## $data
+## $fat
 ## numeric(0)
 ```
 
@@ -91,7 +91,7 @@ date()
 ```
 
 ```
-## [1] "Wed Jun  3 11:14:06 2015"
+## [1] "Wed Jun  3 21:52:40 2015"
 ```
 
 ```r
