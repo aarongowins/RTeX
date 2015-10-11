@@ -1,0 +1,20 @@
+---
+title: "Write-Up"
+author: "aaron gowins"
+date: "October 11, 2015"
+output:
+  html_document:
+    keep_md: true
+---
+
+# Writeup
+### Load data, take a look...
+
+```{r,cache=TRUE}
+URL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+download.file(URL,destfile="TRAIN",method="curl")
+training<-read.csv(file="TRAIN",header=TRUE,sep=",")
+dim(training)
+```
+
+
