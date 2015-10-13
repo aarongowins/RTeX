@@ -75,6 +75,9 @@ img {
 <pre class="r"><code>URL&lt;-&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
 download.file(URL,destfile=&quot;TRAIN&quot;,method=&quot;curl&quot;)
 trainer&lt;-read.csv(file=&quot;TRAIN&quot;,header=TRUE,sep=&quot;,&quot;)
+URL2&lt;-&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;
+download.file(URL2,destfile=&quot;TEST&quot;,method=&quot;curl&quot;)
+tester&lt;-read.csv(file=&quot;TEST&quot;,header=TRUE,sep=&quot;,&quot;)
 #head(trainer)</code></pre>
 <pre class="r"><code>library(caret)
 inTrain&lt;-createDataPartition(y=trainer$classe,p=.75,list=FALSE)
@@ -83,7 +86,7 @@ testing&lt;-trainer[-inTrain,]
 
 
 library(MASS)
-
+#head(tester)
 training$classe&lt;-as.numeric(training$classe)
 training$classe&lt;-as.factor(training$classe)
 #training[training==&quot;&quot;]&lt;-0
@@ -93,8 +96,9 @@ dim(training)</code></pre>
 <pre><code>## [1] 14718   160</code></pre>
 <pre class="r"><code>x&lt;-nearZeroVar(training)
 training&lt;-training[,-x]
-dim(training)</code></pre>
-<pre><code>## [1] 14718    59</code></pre>
+testing&lt;-testing[,-x]
+dim(x)</code></pre>
+<pre><code>## NULL</code></pre>
 <pre class="r"><code>#m&lt;-x[x[,&quot;zeroVar&quot;] + x[,&quot;nzv&quot;] &gt; 0, ] 
 #typeof(m)
 #ls(training)
@@ -130,7 +134,27 @@ typeof(ldaPred)</code></pre>
 <pre class="r"><code>#ct &lt;- table(training$classe, modelFit$class)
 #diag(prop.table(ct, 1))
 # total percent correct
-#sum(diag(prop.table(ct)))</code></pre>
+#sum(diag(prop.table(ct)))
+tester&lt;-tester[,-x]
+dim(tester)</code></pre>
+<pre><code>## [1] 20 59</code></pre>
+<pre class="r"><code>dim(testing)</code></pre>
+<pre><code>## [1] 4904   59</code></pre>
+<pre class="r"><code>trainer[is.na(trainer)]&lt;-0
+testPred&lt;-predict(object=modelFit,newdata=tester)
+tester$classe&lt;-0
+#head(tester)
+typeof(testPred)</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<pre class="r"><code>#typeof(modelFit)
+table(testPred$class, tester$classe)</code></pre>
+<pre><code>##    
+##      0
+##   1 20
+##   2  0
+##   3  0
+##   4  0
+##   5  0</code></pre>
 </div>
 </div>
 

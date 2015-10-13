@@ -10,6 +10,9 @@ October 11, 2015
 URL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 download.file(URL,destfile="TRAIN",method="curl")
 trainer<-read.csv(file="TRAIN",header=TRUE,sep=",")
+URL2<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(URL2,destfile="TEST",method="curl")
+tester<-read.csv(file="TEST",header=TRUE,sep=",")
 #head(trainer)
 ```
 
@@ -22,7 +25,7 @@ testing<-trainer[-inTrain,]
 
 
 library(MASS)
-
+#head(tester)
 training$classe<-as.numeric(training$classe)
 training$classe<-as.factor(training$classe)
 #training[training==""]<-0
@@ -38,11 +41,12 @@ dim(training)
 ```r
 x<-nearZeroVar(training)
 training<-training[,-x]
-dim(training)
+testing<-testing[,-x]
+dim(x)
 ```
 
 ```
-## [1] 14718    59
+## NULL
 ```
 
 ```r
@@ -118,6 +122,46 @@ table(ldaPred$class, testing$classe)
 #diag(prop.table(ct, 1))
 # total percent correct
 #sum(diag(prop.table(ct)))
+tester<-tester[,-x]
+dim(tester)
 ```
 
+```
+## [1] 20 59
+```
+
+```r
+dim(testing)
+```
+
+```
+## [1] 4904   59
+```
+
+```r
+trainer[is.na(trainer)]<-0
+testPred<-predict(object=modelFit,newdata=tester)
+tester$classe<-0
+#head(tester)
+typeof(testPred)
+```
+
+```
+## [1] "list"
+```
+
+```r
+#typeof(modelFit)
+table(testPred$class, tester$classe)
+```
+
+```
+##    
+##      0
+##   1 20
+##   2  0
+##   3  0
+##   4  0
+##   5  0
+```
 
