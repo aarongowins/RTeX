@@ -2,6 +2,9 @@
 title: "Write-Up"
 author: "aaron gowins"
 date: "October 11, 2015"
+pandoc_args: [
+"+RTS","-K64m","-RTS"
+]
 output:
   html_document:
     keep_md: true
@@ -13,8 +16,45 @@ output:
 ```{r,cache=TRUE}
 URL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 download.file(URL,destfile="TRAIN",method="curl")
-training<-read.csv(file="TRAIN",header=TRUE,sep=",")
+trainer<-read.csv(file="TRAIN",header=TRUE,sep=",")
+#head(trainer)
+```
+
+```{r,cache=TRUE}
+
+library(caret)
+inTrain<-createDataPartition(y=trainer$classe,p=.75,list=FALSE)
+training<-trainer[inTrain,]
+testing<-trainer[-inTrain,]
+
+
+library(MASS)
+
+training$classe<-as.numeric(training$classe)
+training$classe<-as.factor(training$classe)
+#training[training==""]<-0
+training[is.na(training)]<-0
+#is.data.frame(training)
 dim(training)
+x<-nearZeroVar(training)
+training<-training[,-x]
+dim(training)
+#m<-x[x[,"zeroVar"] + x[,"nzv"] > 0, ] 
+#typeof(m)
+#ls(training)
+#rm(training[m])
+#head(training)
+modelFit<-lda(classe ~ ., data=training)
+table(predict(modelFit)$class)
+table(predict(modelFit, type="class")$class, training$classe)
+ldaPred<-predict(object=modelFit,newdata=testing)
+typeof(ldaPred)
+typeof(modelFit)
+table(ldaPred$class, testing$classe)
+#ct <- table(training$classe, modelFit$class)
+#diag(prop.table(ct, 1))
+# total percent correct
+#sum(diag(prop.table(ct)))
 ```
 
 

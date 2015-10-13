@@ -9,12 +9,115 @@ October 11, 2015
 ```r
 URL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 download.file(URL,destfile="TRAIN",method="curl")
-training<-read.csv(file="TRAIN",header=TRUE,sep=",")
+trainer<-read.csv(file="TRAIN",header=TRUE,sep=",")
+#head(trainer)
+```
+
+
+```r
+library(caret)
+inTrain<-createDataPartition(y=trainer$classe,p=.75,list=FALSE)
+training<-trainer[inTrain,]
+testing<-trainer[-inTrain,]
+
+
+library(MASS)
+
+training$classe<-as.numeric(training$classe)
+training$classe<-as.factor(training$classe)
+#training[training==""]<-0
+training[is.na(training)]<-0
+#is.data.frame(training)
 dim(training)
 ```
 
 ```
-## [1] 19622   160
+## [1] 14718   160
+```
+
+```r
+x<-nearZeroVar(training)
+training<-training[,-x]
+dim(training)
+```
+
+```
+## [1] 14718    59
+```
+
+```r
+#m<-x[x[,"zeroVar"] + x[,"nzv"] > 0, ] 
+#typeof(m)
+#ls(training)
+#rm(training[m])
+#head(training)
+modelFit<-lda(classe ~ ., data=training)
+```
+
+```
+## Warning in lda.default(x, grouping, ...): variables are collinear
+```
+
+```r
+table(predict(modelFit)$class)
+```
+
+```
+## 
+##    1    2    3    4    5 
+## 4185 2848 2567 2412 2706
+```
+
+```r
+table(predict(modelFit, type="class")$class, training$classe)
+```
+
+```
+##    
+##        1    2    3    4    5
+##   1 4185    0    0    0    0
+##   2    0 2848    0    0    0
+##   3    0    0 2567    0    0
+##   4    0    0    0 2412    0
+##   5    0    0    0    0 2706
+```
+
+```r
+ldaPred<-predict(object=modelFit,newdata=testing)
+typeof(ldaPred)
+```
+
+```
+## [1] "list"
+```
+
+```r
+typeof(modelFit)
+```
+
+```
+## [1] "list"
+```
+
+```r
+table(ldaPred$class, testing$classe)
+```
+
+```
+##    
+##        A    B    C    D    E
+##   1 1395    0    0    0    0
+##   2    0  949    0    0    0
+##   3    0    0  855    0    0
+##   4    0    0    0  804    0
+##   5    0    0    0    0  901
+```
+
+```r
+#ct <- table(training$classe, modelFit$class)
+#diag(prop.table(ct, 1))
+# total percent correct
+#sum(diag(prop.table(ct)))
 ```
 
 
