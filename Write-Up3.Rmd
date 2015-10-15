@@ -1,0 +1,119 @@
+---
+title: "Write-Up3"
+author: "aaron gowins"
+date: "October 11, 2015"
+pandoc_args: [
+"+RTS","-K64m","-RTS"
+]
+output:
+  html_document:
+    keep_md: true
+---
+
+# Writeup
+### Load data, take a look...
+
+```{r,cache=TRUE}
+URL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+download.file(URL,destfile="TRAIN",method="curl")
+trainer<-read.csv(file="TRAIN",header=TRUE,sep=",")
+URL2<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(URL2,destfile="TEST",method="curl")
+tester<-read.csv(file="TEST",header=TRUE,sep=",")
+#head(trainer)
+```
+
+```{r,cache=TRUE}
+trainer$classe<-as.numeric(trainer$classe)
+trainer$classe<-as.factor(trainer$classe)
+library(caret)
+inTrain<-createDataPartition(y=trainer$classe,p=.75,list=FALSE)
+training<-trainer[inTrain,]
+testing<-trainer[-inTrain,]
+library(car)
+scatterplotMatrix(trainer[30:34])
+
+
+
+
+library(MASS)
+#head(tester)
+
+#training$classe<-as.numeric(training$classe)
+#training$classe<-as.factor(training$classe)
+#training[training==""]<-0
+training[is.na(training)]<-0
+testing[is.na(testing)]<-0
+
+#is.data.frame(training)
+#dim(training)
+x<-nearZeroVar(training)
+training<-training[,-x]
+testing<-testing[,-x]
+M<-abs(cor(training[,c(-2,-5,-6,-59)]))
+diag(M)<-0
+     which(M>.9,arr.ind=T)
+#preproc<-preProcess(training[,c(-2,-5,-6,-59)],method=c("center","scale"))
+#training<-predict(preproc,training[,c(-2,-5,-6,-59)])$classe
+#dim(training)
+#head(training)
+
+
+
+#training<-training[,c(-2,-5,-6)]
+#testing<-testing[,c(-2,-5,-6)]
+#training[training==""]<-0
+prepro<-preProcess(training[,c(-2,-5,-6,-59)],method="pca",pcaComp=25)
+trainingPC<-predict(prepro,training[,c(-2,-5,-6,-59)])
+
+plot(trainingPC[,1],trainingPC[,2],xlim=c(-10, 10),ylim=c(-10,10),col=c("red","blue"))
+
+#training$classe<-as.numeric(training$classe)
+#training[sapply(training,is.numeric)]
+#training$classe<-as.factor(training$classe)
+#dim(training)
+#prepro<-preProcess(training[,c(-59)],method=c("center","scale"))
+#training<-predict(prepro,training[,c(-2,-5,-59)])$classe
+#m<-x[x[,"zeroVar"] + x[,"nzv"] > 0, ] 
+#typeof(m)
+#ls(training)
+#rm(training[m])
+#head(training)
+
+
+
+modelFit<-train(training$classe ~ .,method="lda",data=trainingPC)
+train.lda<-predict(modelFit,trainingPC)
+confusionMatrix(training$classe,predict(modelFit,trainingPC))
+#ldahist(data = train.lda[,1], g=Type)
+#table(predict(modelFit)$class)
+#table(predict(modelFit, type="class")$class, training$classe)
+table(train.lda,training$classe)
+
+testingPC<-predict(prepro,testing[,c(-2,-5,-6,-59)])
+testy<-predict(modelFit,testingPC)
+#dim(testing)
+#dim(testingPC)
+head(testingPC)
+#ldaPred<-predict(modelFit,testing)
+confusionMatrix(testing$classe,predict(modelFit,testingPC))
+#typeof(ldaPred)
+#typeof(modelFit)
+table(testy, testing$classe)
+#ct <- table(training$classe, modelFit$class)
+#diag(prop.table(ct, 1))
+# total percent correct
+#sum(diag(prop.table(ct)))
+#tester<-tester[,-x]
+#dim(tester)
+#dim(testing)
+#trainer[is.na(trainer)]<-0
+#testPred<-predict(object=modelFit,newdata=tester)
+#tester$classe<-0
+#head(tester)
+#typeof(testPred)
+#typeof(modelFit)
+#table(testPred$class, tester$classe)
+
+```
+
