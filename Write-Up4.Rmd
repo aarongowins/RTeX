@@ -1,0 +1,101 @@
+---
+title: "Write-Up4"
+author: "aaron gowins"
+date: "October 11, 2015"
+pandoc_args: [
+"+RTS","-K64m","-RTS"
+]
+output:
+  html_document:
+    keep_md: true
+---
+
+# Writeup
+### Load data, take a look...
+
+```{r,cache=TRUE}
+URL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+download.file(URL,destfile="TRAIN",method="curl")
+trainer<-read.csv(file="TRAIN",header=TRUE,sep=",")
+URL2<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(URL2,destfile="TEST",method="curl")
+tester<-read.csv(file="TEST",header=TRUE,sep=",")
+#head(trainer)
+```
+
+
+
+```{r,cache=TRUE}
+ggplot(data=trainer,aes(x=classe,fill=user_name)) + geom_bar()
+trainer$classe<-as.numeric(trainer$classe)
+trainer$classe<-as.factor(trainer$classe)
+library(caret)
+inTrain<-createDataPartition(y=trainer$classe,p=.75,list=FALSE)
+training<-trainer[inTrain,]
+testing<-trainer[-inTrain,]
+library(car)
+
+
+library(AppliedPredictiveModeling)
+featurePlot(x=trainer[,30:34],y=trainer$classe,plot="pairs",auto.key = list(columns = 3))
+scatterplotMatrix(trainer[30:34])
+
+
+
+
+set.seed(111)
+folds<-createFolds(y=trainer$classe,k=10,list=TRUE,returnTrain=TRUE)
+
+
+
+library(MASS)
+
+trainer[is.na(trainer)]<-0
+training[is.na(training)]<-0
+testing[is.na(testing)]<-0
+tester[is.na(tester)]<-0
+
+
+x<-nearZeroVar(training)
+trainer<-trainer[,-x]
+training<-training[,-x]
+testing<-testing[,-x]
+tester<-tester[,-x]
+M<-abs(cor(training[,c(-2,-5,-6,-59)]))
+diag(M)<-0
+     which(M>.9,arr.ind=T)
+
+
+
+prepro<-preProcess(training[,c(-2,-5,-6,-59)],method="pca",pcaComp=40)
+trainingPC<-predict(prepro,training[,c(-2,-5,-6,-59)])
+
+plot(trainingPC[,1],trainingPC[,2],xlim=c(-10, 10),ylim=c(-10,10),col=c("red","blue"))
+
+
+
+
+
+modelFit<-train(training$classe ~ .,method="lda",data=trainingPC,trControl=trainControl(method="cv",number=100))
+train.lda<-predict(modelFit,trainingPC)
+confusionMatrix(training$classe,predict(modelFit,trainingPC))
+
+#table(train.lda,training$classe)
+
+testingPC<-predict(prepro,testing[,c(-2,-5,-6,-59)])
+testy<-predict(modelFit,testingPC)
+
+head(testingPC)
+
+confusionMatrix(testing$classe,predict(modelFit,testingPC))
+
+table(testy, testing$classe)
+
+dim(tester)
+testerPred<-predict(prepro,tester[,c(-2,-5,-6,-59)])
+testerPre<-predict(modelFit,testerPred)
+levels(testerPre)<-c("A","B","C","D","E")
+testerPre
+
+``` 
+
