@@ -49,7 +49,7 @@ scatterplotMatrix(trainer[30:34])
 
 ```r
 set.seed(111)
-folds<-createFolds(y=trainer$classe,k=10,list=TRUE,returnTrain=TRUE)
+
 
 
 
@@ -92,16 +92,27 @@ diag(M)<-0
 ```
 
 ```r
-prepro<-preProcess(training[,c(-2,-5,-6,-59)],method="pca",pcaComp=40)
+prepro<-preProcess(training[,c(-2,-5,-6,-59)],method="pca",pcaComp=31)
 trainingPC<-predict(prepro,training[,c(-2,-5,-6,-59)])
+colors <- c("blue", "grey", "green","red","black")
 
-plot(trainingPC[,1],trainingPC[,2],xlim=c(-10, 10),ylim=c(-10,10),col=c("red","blue"))
+qplot(trainingPC[,1],trainingPC[,2],data=training,colour=classe)
 ```
 
 ![](Write-Up4_files/figure-html/unnamed-chunk-2-4.png) 
 
 ```r
-modelFit<-train(training$classe ~ .,method="lda",data=trainingPC,trControl=trainControl(method="cv",number=100))
+library(scatterplot3d)
+
+colors <- colors[as.numeric(training$classe)]
+scatterplot3d(x=training$classe,y=trainingPC[,1],z=trainingPC[,2], main="3D Scatterplot",
+              pch=19,color=colors)
+```
+
+![](Write-Up4_files/figure-html/unnamed-chunk-2-5.png) 
+
+```r
+modelFit<-train(training$classe ~ .,method="lda",data=trainingPC,trControl=trainControl(method="cv",number=5,repeats=3))
 train.lda<-predict(modelFit,trainingPC)
 confusionMatrix(training$classe,predict(modelFit,trainingPC))
 ```
@@ -111,33 +122,33 @@ confusionMatrix(training$classe,predict(modelFit,trainingPC))
 ## 
 ##           Reference
 ## Prediction    1    2    3    4    5
-##          1 4067  118    0    0    0
-##          2    0 2736  111    1    0
-##          3    0    1 2460  106    0
-##          4    0    0   11 2325   76
-##          5    0    0    0  115 2591
+##          1 4048  137    0    0    0
+##          2    0 2703  145    0    0
+##          3    0    1 2463  103    0
+##          4    0    0   14 2306   92
+##          5    0    0    0  113 2593
 ## 
 ## Overall Statistics
-##                                           
-##                Accuracy : 0.9634          
-##                  95% CI : (0.9602, 0.9664)
-##     No Information Rate : 0.2763          
-##     P-Value [Acc > NIR] : < 2.2e-16       
-##                                           
-##                   Kappa : 0.9537          
-##  Mcnemar's Test P-Value : NA              
+##                                          
+##                Accuracy : 0.9589         
+##                  95% CI : (0.9556, 0.962)
+##     No Information Rate : 0.275          
+##     P-Value [Acc > NIR] : < 2.2e-16      
+##                                          
+##                   Kappa : 0.9481         
+##  Mcnemar's Test P-Value : NA             
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: 1 Class: 2 Class: 3 Class: 4 Class: 5
-## Sensitivity            1.0000   0.9583   0.9527   0.9128   0.9715
-## Specificity            0.9889   0.9906   0.9912   0.9929   0.9905
-## Pos Pred Value         0.9718   0.9607   0.9583   0.9639   0.9575
-## Neg Pred Value         1.0000   0.9900   0.9900   0.9820   0.9937
-## Prevalence             0.2763   0.1940   0.1754   0.1731   0.1812
-## Detection Rate         0.2763   0.1859   0.1671   0.1580   0.1760
+## Sensitivity            1.0000   0.9514   0.9394   0.9144   0.9657
+## Specificity            0.9872   0.9878   0.9914   0.9913   0.9906
+## Pos Pred Value         0.9673   0.9491   0.9595   0.9561   0.9582
+## Neg Pred Value         1.0000   0.9884   0.9869   0.9824   0.9923
+## Prevalence             0.2750   0.1930   0.1781   0.1714   0.1824
+## Detection Rate         0.2750   0.1837   0.1673   0.1567   0.1762
 ## Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1839
-## Balanced Accuracy      0.9945   0.9744   0.9720   0.9528   0.9810
+## Balanced Accuracy      0.9936   0.9696   0.9654   0.9528   0.9782
 ```
 
 ```r
@@ -185,20 +196,6 @@ head(testingPC)
 ## 16 -0.031824607 0.3788465 -0.4100282 0.4423922 0.6169317 0.9218807
 ## 18 -0.052280751 0.3519384 -0.4107110 0.2921470 0.5554433 0.9134806
 ## 26 -0.061654634 0.3664087 -0.4513140 0.3793312 0.5875307 0.9149512
-##             PC32       PC33         PC34       PC35       PC36      PC37
-## 2  -0.0002781501 -0.2559635 -0.170773685 0.07783181 -0.7034902 0.1529632
-## 12  0.0140477522 -0.2109518 -0.122199880 0.06746674 -0.7164311 0.1926463
-## 15 -0.0714961141 -0.1364285  0.002989527 0.09301497 -0.7786660 0.1535345
-## 16 -0.0930592955 -0.1003957  0.099608529 0.10191976 -0.8271080 0.1467133
-## 18 -0.0003391834 -0.2072782  0.013269024 0.10506553 -0.7067838 0.2275304
-## 26 -0.0185009818 -0.2218778 -0.117491073 0.08071778 -0.7583262 0.1541010
-##          PC38       PC39         PC40
-## 2  -0.1966723 -0.3870245 -0.010880979
-## 12 -0.2100488 -0.3596111 -0.009749286
-## 15 -0.1433179 -0.4057140 -0.003698604
-## 16 -0.1138432 -0.3841706 -0.031847291
-## 18 -0.2395933 -0.3293139  0.028507597
-## 26 -0.1458835 -0.4153209 -0.066469473
 ```
 
 ```r
@@ -210,33 +207,33 @@ confusionMatrix(testing$classe,predict(modelFit,testingPC))
 ## 
 ##           Reference
 ## Prediction    1    2    3    4    5
-##          1 1348   46    0    0    1
-##          2    0  911   38    0    0
-##          3    0    0  821   34    0
-##          4    0    0    3  777   24
-##          5    0    0    0   30  871
+##          1 1345   49    0    0    1
+##          2    0  898   51    0    0
+##          3    0    0  825   30    0
+##          4    0    0    5  770   29
+##          5    0    0    0   29  872
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9641          
-##                  95% CI : (0.9585, 0.9691)
-##     No Information Rate : 0.2749          
+##                Accuracy : 0.9604          
+##                  95% CI : (0.9546, 0.9657)
+##     No Information Rate : 0.2743          
 ##     P-Value [Acc > NIR] : < 2.2e-16       
 ##                                           
-##                   Kappa : 0.9547          
+##                   Kappa : 0.95            
 ##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: 1 Class: 2 Class: 3 Class: 4 Class: 5
-## Sensitivity            1.0000   0.9519   0.9524   0.9239   0.9721
-## Specificity            0.9868   0.9904   0.9916   0.9934   0.9925
-## Pos Pred Value         0.9663   0.9600   0.9602   0.9664   0.9667
-## Neg Pred Value         1.0000   0.9884   0.9899   0.9844   0.9938
-## Prevalence             0.2749   0.1951   0.1758   0.1715   0.1827
-## Detection Rate         0.2749   0.1858   0.1674   0.1584   0.1776
+## Sensitivity            1.0000   0.9483   0.9364   0.9288   0.9667
+## Specificity            0.9860   0.9871   0.9925   0.9917   0.9928
+## Pos Pred Value         0.9642   0.9463   0.9649   0.9577   0.9678
+## Neg Pred Value         1.0000   0.9876   0.9862   0.9856   0.9925
+## Prevalence             0.2743   0.1931   0.1796   0.1690   0.1839
+## Detection Rate         0.2743   0.1831   0.1682   0.1570   0.1778
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1639   0.1837
-## Balanced Accuracy      0.9934   0.9712   0.9720   0.9586   0.9823
+## Balanced Accuracy      0.9930   0.9677   0.9645   0.9602   0.9797
 ```
 
 ```r
@@ -246,12 +243,18 @@ table(testy, testing$classe)
 ```
 ##      
 ## testy    1    2    3    4    5
-##     1 1348    0    0    0    0
-##     2   46  911    0    0    0
-##     3    0   38  821    3    0
-##     4    0    0   34  777   30
-##     5    1    0    0   24  871
+##     1 1345    0    0    0    0
+##     2   49  898    0    0    0
+##     3    0   51  825    5    0
+##     4    0    0   30  770   29
+##     5    1    0    0   29  872
 ```
+
+```r
+plot(testing$classe,testy)
+```
+
+![](Write-Up4_files/figure-html/unnamed-chunk-2-6.png) 
 
 ```r
 dim(tester)

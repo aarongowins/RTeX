@@ -44,7 +44,7 @@ scatterplotMatrix(trainer[30:34])
 
 
 set.seed(111)
-folds<-createFolds(y=trainer$classe,k=10,list=TRUE,returnTrain=TRUE)
+
 
 
 
@@ -67,16 +67,22 @@ diag(M)<-0
 
 
 
-prepro<-preProcess(training[,c(-2,-5,-6,-59)],method="pca",pcaComp=40)
+prepro<-preProcess(training[,c(-2,-5,-6,-59)],method="pca",pcaComp=31)
 trainingPC<-predict(prepro,training[,c(-2,-5,-6,-59)])
+colors <- c("blue", "grey", "green","red","black")
 
-plot(trainingPC[,1],trainingPC[,2],xlim=c(-10, 10),ylim=c(-10,10),col=c("red","blue"))
+qplot(trainingPC[,1],trainingPC[,2],data=training,colour=classe)
+library(scatterplot3d)
+
+colors <- colors[as.numeric(training$classe)]
+scatterplot3d(x=training$classe,y=trainingPC[,1],z=trainingPC[,2], main="3D Scatterplot",
+              pch=19,color=colors)
 
 
 
 
 
-modelFit<-train(training$classe ~ .,method="lda",data=trainingPC,trControl=trainControl(method="cv",number=100))
+modelFit<-train(training$classe ~ .,method="lda",data=trainingPC,trControl=trainControl(method="cv",number=5,repeats=3))
 train.lda<-predict(modelFit,trainingPC)
 confusionMatrix(training$classe,predict(modelFit,trainingPC))
 
@@ -90,6 +96,7 @@ head(testingPC)
 confusionMatrix(testing$classe,predict(modelFit,testingPC))
 
 table(testy, testing$classe)
+plot(testing$classe,testy)
 
 dim(tester)
 testerPred<-predict(prepro,tester[,c(-2,-5,-6,-59)])
